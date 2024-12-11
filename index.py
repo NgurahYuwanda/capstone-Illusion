@@ -76,6 +76,28 @@ def index():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route("/scanned-images", methods=['GET'])
+def get_scanned_images():
+    try:
+        # Fetch all documents from the 'scanned_images' collection
+        scanned_images = db.collection('scanned_images').stream()
+
+        # Prepare the response data
+        data = []
+        for doc in scanned_images:
+            item = doc.to_dict()
+            item['id'] = doc.id  # Optionally include document ID
+            data.append(item)
+
+        result = {
+            "status": "success",
+            "message": "Data retrieved successfully",
+            "data": data
+        }
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # Run Server
 if __name__ == "__main__":
     print("Server: http://0.0.0.0:8080")
