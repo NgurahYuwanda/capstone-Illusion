@@ -4,9 +4,13 @@ import os
 import numpy as np
 import tensorflow as tf
 from keras.utils import load_img, img_to_array
+from google.cloud import firestore
 
-# Threshold (level of tolerance for the classification) 
+# Threshold (level of tolerance for the classification)
 THRESHOLD = 0.5
+
+# Initialize Firestore client
+db = firestore.Client()
 
 # Load the ML model
 model = tf.keras.models.load_model('./model.h5')
@@ -34,6 +38,16 @@ def predict_image(image):
 
     return labels.get(predicted_label), confidence
 
+# Save result to Firestore
+def save_to_firestore(image_name, predicted_label, confidence):
+    # Create a new document in the 'scanned_images' collection
+    doc_ref = db.collection('scanned_images').document()
+    doc_ref.set({
+        'image_name': image_name,
+        'predicted_label': predicted_label,
+        'confidence': confidence
+    })
+
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 
@@ -47,12 +61,15 @@ def index():
             image = preprocess_image('uploaded_image.jpg')
             predicted_label, confidence = predict_image(image)
 
+            # Save the result to Firestore
+            save_to_firestore('uploaded_image.jpg', predicted_label, confidence)
+
             result = {
-            "status": "success",
-            "message": "Prediction completed",
-            "data": {
-                "predicted_label": predicted_label,
-                "confidence": confidence
+                "status": "success",
+                "message": "Prediction completed",
+                "data": {
+                    "predicted_label": predicted_label,
+                    "confidence": confidence
                 }
             }
             return jsonify(result)
