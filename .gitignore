@@ -1,0 +1,8 @@
+# Exclude .venv folders
+.venv/
+
+# Exclude model.h5 file
+model.h5
+
+# Exclude uploaded_image.jpg file
+uploaded_image.jpg
