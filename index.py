@@ -27,13 +27,13 @@ def preprocess_image(image_path):
     image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
     return image
 
-# Used to predict the images' class
+# Used to determine an image's label
 def predict_image(image):
     prediction = model.predict(image, verbose=0)
     confidence = float(prediction[0, 0])
     predicted_label = 1 if confidence > THRESHOLD else 0
 
-    if predicted_label == 0:  # Fake
+    if predicted_label == 0:
         confidence = 1 - confidence
 
     return labels.get(predicted_label), confidence
@@ -86,7 +86,7 @@ def get_scanned_images():
         data = []
         for doc in scanned_images:
             item = doc.to_dict()
-            item['id'] = doc.id  # Optionally include document ID
+            item['id'] = doc.id
             data.append(item)
 
         result = {
